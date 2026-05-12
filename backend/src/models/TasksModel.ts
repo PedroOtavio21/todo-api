@@ -1,8 +1,10 @@
+export type TaskStatus = 'PENDING' | 'DONE'
+
 export interface Task {
-    id: number,
-    title: string,
-    description: string | "",
-    status: "todo" | "done",
-    createdAt: Date,
-    updatedAt: Date
+  id: number
+  title: string
+  description: string | null
+  status: TaskStatus
+  createdAt: Date
+  updatedAt: Date
 }
