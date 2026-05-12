@@ -4,7 +4,7 @@ import { Handler } from "express";
 
 const StoreSchema = z.object({
     title: z.string(),
-    description: z.string(),
+    description: z.string().optional(),
     status: z.enum(["PENDING", "DONE"]),
 })
 
