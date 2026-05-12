@@ -1,6 +1,6 @@
 // src/repositories/TaskRepository.ts
 import { prisma } from '../lib/prisma'
-import { Task, TaskStatus } from '../models/TasksModel'
+import { Task, TaskStatus } from '../models/TaskModel'
 
 export class TaskRepository {
   async findAll(status?: TaskStatus): Promise<Task[]> {
