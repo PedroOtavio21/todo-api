@@ -1,5 +1,3 @@
-import { Task } from "./TaskModel";
-
 export interface User {
   id: number
   name?: string | null

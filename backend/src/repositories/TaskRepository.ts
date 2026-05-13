@@ -2,31 +2,35 @@ import { prisma } from '../lib/prisma'
 import { Task, TaskStatus } from '../models/TaskModel'
 
 export class TaskRepository {
-  async findAll(status?: TaskStatus): Promise<Task[]> {
+  async findAll(userId: number, status?: TaskStatus): Promise<Task[]> {
     return prisma.task.findMany({
-      where: status ? { status } : undefined,
+      where: {
+        userId,
+        ...(status ? { status } : {}),
+      },
       orderBy: { id: 'asc' },
     })
   }
 
-  async findById(id: number): Promise<Task | null> {
+  async findById(id: number, userId: number): Promise<Task | null> {
     return prisma.task.findUnique({
-      where: { id },
+      where: { id, userId },
     })
   }
 
-  async create(data: Pick<Task, 'title' | 'description' | 'status'>): Promise<Task> {
+  async create(data: Pick<Task, 'title' | 'description' | 'status' | 'userId'>): Promise<Task> {
     return prisma.task.create({
       data: {
         title: data.title,
         description: data.description,
         status: data.status ?? 'PENDING',
+        userId: data.userId,
       },
     })
   }
 
-  async update(id: number, data: Partial<Pick<Task, 'title' | 'description' | 'status'>>): Promise<Task | null> {
-    const exists = await prisma.task.findUnique({ where: { id } })
+  async update(id: number, userId: number, data: Partial<Pick<Task, 'title' | 'description' | 'status'>>): Promise<Task | null> {
+    const exists = await prisma.task.findUnique({ where: { id, userId } })
     if (!exists) return null
 
     return prisma.task.update({
@@ -35,8 +39,8 @@ export class TaskRepository {
     })
   }
 
-  async delete(id: number): Promise<Task | null> {
-    const exists = await prisma.task.findUnique({ where: { id } })
+  async delete(id: number, userId: number): Promise<Task | null> {
+    const exists = await prisma.task.findUnique({ where: { id, userId } })
     if (!exists) return null
 
     return prisma.task.delete({
