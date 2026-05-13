@@ -4,11 +4,11 @@ import { TaskRepository } from "../repositories/TaskRepository";
 
 export class TaskService {
     constructor(private repository: TaskRepository){}
-    async getAll(){
-        return this.repository.findAll()
+    async getAll(userId: number){
+        return this.repository.findAll(userId)
     }
-    async getById(id: number){
-        const task = await this.repository.findById(id)
+    async getById(userId:number, id: number){
+        const task = await this.repository.findById(id, userId)
         if (!task) throw new HttpError(404, "Task not found!")
         return task
     }
@@ -16,12 +16,12 @@ export class TaskService {
         if (task.status === "DONE") throw new HttpError(400, "Cannot create a task already done!")
         return this.repository.create(task)
     }
-    async update(id: number, task: Partial<Omit<Task, "id" | "createdAt" | "updatedAt">>) {
-        await this.getById(id)
-        return this.repository.update(id, task)
+    async update(userId: number, id: number, task: Partial<Omit<Task, "id" | "createdAt" | "updatedAt">>) {
+        await this.getById(id, userId)
+        return this.repository.update(id, userId,task)
     }
-    async delete(id: number){
-        await this.getById(id)
-        return this.repository.delete(id)
+    async delete(userId: number, id: number){
+        await this.getById(userId, id)
+        return this.repository.delete(id, userId)
     }
 }
