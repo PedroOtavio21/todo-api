@@ -7,7 +7,7 @@ interface JwtPayload {
 }
 
 export interface AuthRequest{
-  user?: {
+  user: {
     id: number
     email: string
   }
@@ -28,7 +28,7 @@ export const authMiddleware: Handler = (req, res, next) => {
 
   try {
     const payload = jwt.verify(token, secret) as JwtPayload
-    (req as AuthRequest).user = { id: payload.id, email: payload.email }
+    (req as unknown as AuthRequest).user = { id: payload.id, email: payload.email }
     next()
   } catch {
     res.status(401).json({ message: 'Invalid or expired token!' })
