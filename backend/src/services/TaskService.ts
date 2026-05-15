@@ -1,11 +1,11 @@
 import { HttpError } from "../errors/HttpError";
-import { Task } from "../models/TaskModel";
+import { Task, TaskStatus } from "../models/TaskModel";
 import { TaskRepository } from "../repositories/TaskRepository";
 
 export class TaskService {
     constructor(private repository: TaskRepository){}
-    async getAll(userId: number){
-        return this.repository.findAll(userId)
+    async getAll(userId: number, status?: TaskStatus) {
+        return this.repository.findAll(userId, status)
     }
     async getById(userId:number, id: number){
         const task = await this.repository.findById(id, userId)
@@ -17,7 +17,7 @@ export class TaskService {
         return this.repository.create(task)
     }
     async update(userId: number, id: number, task: Partial<Omit<Task, "id" | "createdAt" | "updatedAt">>) {
-        await this.getById(id, userId)
+        await this.getById(userId, id)
         return this.repository.update(id, userId,task)
     }
     async delete(userId: number, id: number){
