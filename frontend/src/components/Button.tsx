@@ -6,9 +6,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants = {
-  primary: 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300',
-  danger:  'bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300',
-  ghost:   'bg-transparent text-gray-600 hover:bg-gray-100 disabled:text-gray-300',
+  primary: 'bg-black text-white hover:bg-[#E8500A] disabled:bg-gray-300',
+  danger:  'bg-black text-white border-2 border-black hover:bg-red-600 disabled:opacity-40',
+  ghost:   'bg-transparent text-black border-2 border-black hover:bg-black hover:text-white disabled:opacity-40',
 }
 
 export function Button({
@@ -22,7 +22,7 @@ export function Button({
   return (
     <button
       disabled={disabled || loading}
-      className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed ${variants[variant]} ${className}`}
+      className={`flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold tracking-wide transition-colors duration-150 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
       {...props}
     >
       {loading && (

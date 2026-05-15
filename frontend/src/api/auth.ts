@@ -14,6 +14,7 @@ interface LoginData {
 
 interface LoginResponse {
   token: string
+  user: User
 }
 
 export async function register(data: RegisterData): Promise<User> {
@@ -22,6 +23,17 @@ export async function register(data: RegisterData): Promise<User> {
 }
 
 export async function login(data: LoginData): Promise<LoginResponse> {
-  const response = await api.post<LoginResponse>('/login', data)
-  return response.data
+  const response = await api.post<{ token: string }>('/login', data)
+  const { token } = response.data
+
+  const payload = JSON.parse(atob(token.split('.')[1]))
+
+  const user: User = {
+    id: payload.id,
+    email: payload.email,
+    createdAt: '',
+    updatedAt: '',
+  }
+
+  return { token, user }
 }
