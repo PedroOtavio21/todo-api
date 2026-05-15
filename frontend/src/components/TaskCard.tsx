@@ -44,7 +44,7 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
 
   return (
     <>
-      <div className="group flex items-center justify-between border border-gray-200 bg-white px-5 py-4 transition-all duration-150 hover:border-black">
+      <div className="group flex items-center justify-between border border-black bg-white px-5 py-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
         <div className="flex items-start gap-4 flex-1 min-w-0">
           <input
             type="checkbox"
@@ -55,7 +55,7 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
             title={isDone ? 'Marcar como pendente' : 'Marcar como concluída'}
           />
           <div className="flex-1 min-w-0">
-            <p className={`text-sm font-semibold leading-snug ${isDone ? 'text-gray-400 line-through' : 'text-accent'}`}>
+            <p className={`text-sm font-semibold leading-snug ${isDone ? 'text-gray-400 line-through' : 'text-black'}`}>
               {task.title}
             </p>
             {task.description && (
@@ -64,7 +64,7 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
             <div className="mt-2 flex items-center gap-3">
               <StatusBadge status={task.status} />
               <span className="text-xs text-gray-400">
-                Criado em: {new Date(task.createdAt).toLocaleDateString('pt-BR')}
+                {new Date(task.createdAt).toLocaleDateString('pt-BR')}
               </span>
             </div>
           </div>
