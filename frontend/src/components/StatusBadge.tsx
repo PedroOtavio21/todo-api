@@ -8,13 +8,13 @@ export function StatusBadge({ status }: StatusBadgeProps) {
   const isDone = status === 'DONE'
 
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium
+    <span className={`inline-flex items-center gap-1.5 border px-2 py-0.5 text-xs font-semibold uppercase tracking-wider
       ${isDone
-        ? 'bg-green-100 text-green-700'
-        : 'bg-yellow-100 text-yellow-700'
+        ? 'border-black text-black bg-white'
+        : 'border-accent text-accent bg-white'
       }`}
     >
-      <span className={`h-1.5 w-1.5 rounded-full ${isDone ? 'bg-green-500' : 'bg-yellow-500'}`} />
+      <span className={`h-1.5 w-1.5 rounded-full ${isDone ? 'bg-black' : 'bg-accent'}`} />
       {isDone ? 'Concluída' : 'Pendente'}
     </span>
   )
