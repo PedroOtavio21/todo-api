@@ -20,7 +20,8 @@ export class TaskController {
     index: Handler = async (req, res, next) => {
         try {
             const { id: userId } = (req as unknown as AuthRequest).user
-            const tasks = await this.service.getAll(userId)
+            const { status } = req.query as { status?: 'PENDING' | 'DONE' }
+            const tasks = await this.service.getAll(userId, status)
             res.json(tasks)
         } catch (error) {
             next(error)
