@@ -12,19 +12,19 @@ export function Navbar() {
   }
 
   return (
-    <header className="border-b border-gray-200 bg-white px-6 py-3">
+    <header className="border-b border-gray-200 bg-white px-6 py-4">
       <div className="mx-auto flex max-w-3xl items-center justify-between">
         <span
-          className="cursor-pointer text-base font-semibold text-blue-600"
+          className="cursor-pointer text-lg font-bold tracking-tight text-black hover:text-accent transition-colors duration-150"
           onClick={() => navigate('/tasks')}
         >
-          Todo App
+          TODO-API.
         </span>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500">
+        <div className="flex items-center gap-4">
+          <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
             {user?.name ?? user?.email}
           </span>
-          <Button variant="ghost" onClick={handleLogout}>
+          <Button variant="ghost" onClick={handleLogout} className="text-xs px-3 py-2">
             Sair
           </Button>
         </div>
