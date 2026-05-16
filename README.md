@@ -225,6 +225,7 @@ Request → Route → Middleware (auth) → Controller (validação Zod) → Ser
 | `400` | Dados inválidos (Zod) ou regra de negócio violada |
 | `401` | Token ausente, inválido ou expirado |
 | `404` | Recurso não encontrado |
+| `409` | Conflito — e-mail já cadastrado |
 | `500` | Erro interno do servidor |
 
 ---
@@ -306,23 +307,46 @@ O servidor estará disponível em `http://localhost:3000` (ou na porta configura
 
 ## Frontend
 
-O frontend do projeto está em desenvolvimento e utilizará as seguintes tecnologias:
+Interface web construída em React que consome a API REST do backend.
 
 | Camada | Tecnologia |
 |---|---|
-| Framework | React.js |
-| Linguagem | TypeScript |
+| Framework | React.js + TypeScript |
 | Estilização | Tailwind CSS |
-| Cliente HTTP | Axios (previsto) |
+| Roteamento | React Router DOM |
+| Cliente HTTP | Axios |
+| Validação | Zod |
 
-> Scripts, rotas e demais configurações do frontend serão documentados em uma próxima versão deste README, conforme o desenvolvimento avançar.
+### Instalação
 
----
+```bash
+cd todo-api-develop/frontend
+npm install
+```
 
-## Scripts do `package.json`
+### Variáveis de ambiente
 
-| Script | Comando | Descrição |
+Crie um `.env` na pasta `frontend/` baseado no `.env.example`:
+
+```env
+VITE_API_URL=http://localhost:3000/api/v1
+```
+
+### Scripts
+
+| Script | Descrição |
+|---|---|
+| `npm run dev` | Inicia em modo desenvolvimento em `http://localhost:5173` |
+| `npm run build` | Gera o build de produção na pasta `dist/` |
+| `npm run preview` | Visualiza o build de produção localmente |
+
+### Páginas
+
+| Rota | Descrição | Autenticação |
 |---|---|---|
-| `npm run dev` | `tsx watch src/index.ts` | Inicia em modo desenvolvimento com hot reload |
-| `npm run build` | `tsc` | Compila o TypeScript para JavaScript na pasta `build/` |
-| `npm start` | `node build/index.js` | Inicia o servidor a partir do build compilado |
+| `/login` | Tela de entrada com formulário de login | Pública |
+| `/register` | Cadastro de novo usuário | Pública |
+| `/tasks` | Lista de tarefas com filtro por status | Protegida |
+| `/tasks/new` | Formulário de criação de tarefa | Protegida |
+| `/tasks/:id` | Detalhes de uma tarefa | Protegida |
+| `/tasks/:id/edit` | Edição de uma tarefa | Protegida |

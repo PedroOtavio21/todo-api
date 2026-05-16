@@ -11,7 +11,7 @@ export class UserService {
     constructor(private repository: UserRepository){}
     async register(data: Pick<User, "email" | "password"> & { name?: string }): Promise<Omit<User, "password">> {
         const existing = await this.repository.findByEmail(data.email)
-        if (existing) throw new HttpError(404, 'Email already in use!')
+        if (existing) throw new HttpError(409, 'Email already in use!')
 
         const hashedPassword = await bcrypt.hash(data.password, 10)
 
@@ -24,7 +24,7 @@ export class UserService {
         const { password: _, ...userWithoutPassword } = user
         return userWithoutPassword
     }
-    async login(email: string, password: string): Promise<{ token: string }> {
+    async login(email: string, password: string): Promise<{ token: string, user: Omit<User, "password"> }> {
         const user = await this.repository.findByEmail(email)
         if (!user) throw new HttpError(404, 'User not found!')
 
@@ -40,7 +40,7 @@ export class UserService {
             secret,
             { expiresIn: process.env.JWT_EXPIRES_IN ?? '7d' } as jwt.SignOptions
         )
-
-        return { token }
+        const { password: _, ...userWithoutPassword } = user
+        return { token, user: userWithoutPassword }
     }
 }

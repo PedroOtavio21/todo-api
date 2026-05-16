@@ -16,11 +16,12 @@ const UpdateSchema = z.object({
 })
 
 export class TaskController {
-    constructor(private service: TaskService){}
+    constructor(private service: TaskService) {}
     index: Handler = async (req, res, next) => {
         try {
             const { id: userId } = (req as unknown as AuthRequest).user
-            const tasks = await this.service.getAll(userId)
+            const { status } = req.query as { status?: 'PENDING' | 'DONE' }
+            const tasks = await this.service.getAll(userId, status)
             res.json(tasks)
         } catch (error) {
             next(error)
@@ -39,7 +40,7 @@ export class TaskController {
     show: Handler = async (req, res, next) => {
         try {
             const { id: userId } = (req as unknown as AuthRequest).user
-            const task = await this.service.getById(userId, Number(req.params.id))
+            const task = await this.service.getById(Number(req.params.id), userId)
             res.json(task)
         } catch (error) {
             next(error)
@@ -49,7 +50,7 @@ export class TaskController {
         try {
             const { id: userId } = (req as unknown as AuthRequest).user
             const body = UpdateSchema.parse(req.body)
-            const task = await this.service.update(userId, Number(req.params.id), body)
+            const task = await this.service.update(Number(req.params.id), userId, body)
             res.json(task)
         } catch (error) {
             next(error)
@@ -58,7 +59,7 @@ export class TaskController {
     delete: Handler = async (req, res, next) => {
         try {
             const { id: userId } = (req as unknown as AuthRequest).user
-            await this.service.delete(userId, Number(req.params.id))
+            await this.service.delete(Number(req.params.id), userId)
             res.status(204).send()
         } catch (error) {
             next(error)
