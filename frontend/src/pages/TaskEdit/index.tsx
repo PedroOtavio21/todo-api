@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { getTaskById, updateTask } from '../../api/tasks'
-import { taskSchema } from '../../validators'
-import type { TaskFormData } from '../../validators'
+import { taskEditSchema } from '../../validators'
+import type { TaskEditFormData } from '../../validators'
 import { Navbar } from '../../components/Navbar'
 import { Input } from '../../components/Input'
 import { Button } from '../../components/Button'
@@ -11,8 +11,8 @@ export function TaskEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const [form, setForm] = useState<TaskFormData>({ title: '', description: '', status: 'PENDING' })
-  const [errors, setErrors] = useState<Partial<Record<keyof TaskFormData, string>>>({})
+  const [form, setForm] = useState<TaskEditFormData>({ title: '', description: '', status: 'PENDING' })
+  const [errors, setErrors] = useState<Partial<Record<keyof TaskEditFormData, string>>>({})
   const [apiError, setApiError] = useState('')
   const [loadingTask, setLoadingTask] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -50,11 +50,11 @@ export function TaskEditPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    const result = taskSchema.safeParse(form)
+    const result = taskEditSchema.safeParse(form)
     if (!result.success) {
-      const fieldErrors: Partial<Record<keyof TaskFormData, string>> = {}
+      const fieldErrors: Partial<Record<keyof TaskEditFormData, string>> = {}
       for (const issue of result.error.issues) {
-        const field = issue.path[0] as keyof TaskFormData
+        const field = issue.path[0] as keyof TaskEditFormData
         if (!fieldErrors[field]) fieldErrors[field] = issue.message
       }
       setErrors(fieldErrors)
@@ -116,7 +116,7 @@ export function TaskEditPage() {
                 type="text"
                 label="Título"
                 placeholder="Ex: Implementar autenticação"
-                value={form.title}
+                value={form.title ?? ''}
                 onChange={handleChange}
                 error={errors.title}
                 autoFocus

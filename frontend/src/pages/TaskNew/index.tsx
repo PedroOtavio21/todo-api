@@ -9,12 +9,12 @@ import { Button } from '../../components/Button'
 
 export function TaskNewPage() {
   const navigate = useNavigate()
-  const [form, setForm] = useState<TaskFormData>({ title: '', description: '', status: 'PENDING' })
+  const [form, setForm] = useState<TaskFormData>({ title: '', description: '' })
   const [errors, setErrors] = useState<Partial<Record<keyof TaskFormData, string>>>({})
   const [apiError, setApiError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = e.target
     setForm(prev => ({ ...prev, [name]: value }))
     setErrors(prev => ({ ...prev, [name]: '' }))
@@ -40,7 +40,6 @@ export function TaskNewPage() {
       await createTask({
         title: result.data.title,
         description: result.data.description || null,
-        status: result.data.status,
       })
       navigate('/tasks')
     } catch {
@@ -55,7 +54,6 @@ export function TaskNewPage() {
       <Navbar />
 
       <main className="mx-auto max-w-xl px-6 py-10">
-        {/* Back link */}
         <Link
           to="/tasks"
           className="mb-8 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-gray-400 hover:text-black transition-colors"
@@ -63,7 +61,6 @@ export function TaskNewPage() {
           ← Lista de tarefas
         </Link>
 
-        {/* Header */}
         <h1 className="mt-4 text-3xl font-bold tracking-tight text-black">
           Nova tarefa
         </h1>
@@ -71,7 +68,6 @@ export function TaskNewPage() {
           Preencha os dados abaixo para criar uma nova tarefa.
         </p>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-7">
           <Input
             id="title"
@@ -85,13 +81,15 @@ export function TaskNewPage() {
             autoFocus
           />
 
-          {/* Textarea for description */}
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="description"
               className="text-xs font-semibold uppercase tracking-wider text-black"
             >
-              Descrição <span className="font-normal text-gray-400 normal-case tracking-normal">(opcional)</span>
+              Descrição{' '}
+              <span className="font-normal text-gray-400 normal-case tracking-normal">
+                (opcional)
+              </span>
             </label>
             <textarea
               id="description"
@@ -104,24 +102,9 @@ export function TaskNewPage() {
             />
           </div>
 
-          {/* Status select */}
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="status"
-              className="text-xs font-semibold uppercase tracking-wider text-black"
-            >
-              Status
-            </label>
-            <select
-              id="status"
-              name="status"
-              value={form.status}
-              onChange={handleChange}
-              className="border-b-2 border-gray-200 bg-transparent py-2 text-sm text-black outline-none transition focus:border-black appearance-none cursor-pointer"
-            >
-              <option value="PENDING">Pendente</option>
-              <option value="DONE">Concluída</option>
-            </select>
+          <div className="flex items-center gap-2 text-xs text-gray-400">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+            Toda tarefa começa como pendente
           </div>
 
           {apiError && (
