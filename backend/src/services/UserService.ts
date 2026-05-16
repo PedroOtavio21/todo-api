@@ -24,7 +24,7 @@ export class UserService {
         const { password: _, ...userWithoutPassword } = user
         return userWithoutPassword
     }
-    async login(email: string, password: string): Promise<{ token: string }> {
+    async login(email: string, password: string): Promise<{ token: string, user: Omit<User, "password"> }> {
         const user = await this.repository.findByEmail(email)
         if (!user) throw new HttpError(404, 'User not found!')
 
@@ -40,7 +40,7 @@ export class UserService {
             secret,
             { expiresIn: process.env.JWT_EXPIRES_IN ?? '7d' } as jwt.SignOptions
         )
-
-        return { token }
+        const { password: _, ...userWithoutPassword } = user
+        return { token, user: userWithoutPassword }
     }
 }
