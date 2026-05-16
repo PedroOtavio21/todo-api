@@ -11,7 +11,7 @@ export class UserService {
     constructor(private repository: UserRepository){}
     async register(data: Pick<User, "email" | "password"> & { name?: string }): Promise<Omit<User, "password">> {
         const existing = await this.repository.findByEmail(data.email)
-        if (existing) throw new HttpError(404, 'Email already in use!')
+        if (existing) throw new HttpError(409, 'Email already in use!')
 
         const hashedPassword = await bcrypt.hash(data.password, 10)
 
