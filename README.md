@@ -1,62 +1,97 @@
 # Todo API
 
-API REST para gerenciamento de tarefas (To-Do List) construída com Node.js, Express, TypeScript, Prisma e PostgreSQL. O projeto cobre todos os requisitos obrigatórios do MVP e inclui os diferenciais de autenticação JWT e criptografia de senhas com bcrypt.
+Aplicação fullstack de gerenciamento de tarefas (To-Do List) desenvolvida como desafio técnico para vaga. Cobre todos os requisitos obrigatórios do MVP e inclui os diferenciais de autenticação JWT, validação de dados com Zod e filtros de listagem.
 
 ---
 
 ## Funcionalidades
 
-- Criação, listagem, busca, edição e exclusão de tarefas
-- Autenticação de usuários via JWT (registro e login)
+- Cadastro e autenticação de usuários via JWT
 - Senhas armazenadas com hash bcrypt
-- Validação de dados com Zod
-- Tratamento centralizado de erros
-- Tarefas isoladas por usuário (cada usuário vê apenas as próprias tarefas)
+- Criação, listagem, busca, edição e exclusão de tarefas
+- Marcar tarefa como concluída e desmarcar
+- Filtro de tarefas por status (todas, pendentes, concluídas)
+- Tarefas isoladas por usuário — cada usuário vê apenas as próprias tarefas
+- Validação de dados no backend (Zod) e no frontend (Zod)
+- Tratamento centralizado de erros com mensagens claras
 
 ---
 
 ## Arquitetura
 
-O projeto segue uma arquitetura em camadas, separando responsabilidades de forma clara e facilitando a manutenção:
+### Backend
 
 ```
-src/
-├── controllers/      # Recebe as requisições HTTP, valida o body com Zod e chama a Service
-├── services/         # Contém as regras de negócio (ex: impede criar tarefa já como DONE)
-├── repositories/     # Camada de acesso ao banco via Prisma
-├── middlewares/      # auth-middleware (JWT) e error-handler global
-├── models/           # Tipos TypeScript das entidades (Task, User)
-├── routes/           # Definição das rotas e instanciação das dependências
-├── errors/           # Classe HttpError para erros esperados
-├── lib/              # Instância singleton do PrismaClient
-└── index.ts          # Entry point: configura o Express e sobe o servidor
-prisma/
-├── schema.prisma     # Definição dos models (Task, User) e enum Status
-└── migrations/       # Histórico de migrações do banco
+backend/
+├── src/
+│   ├── controllers/   # Recebe requisições HTTP, valida o body com Zod e chama a Service
+│   ├── services/      # Regras de negócio
+│   ├── repositories/  # Acesso ao banco via Prisma
+│   ├── middlewares/   # Autenticação JWT e error handler global
+│   ├── models/        # Interfaces TypeScript das entidades (Task, User)
+│   ├── routes/        # Definição de rotas e instanciação de dependências
+│   ├── errors/        # Classe HttpError para erros tratados
+│   ├── lib/           # Instância singleton do PrismaClient
+│   └── index.ts       # Entry point — configura Express e sobe o servidor
+└── prisma/
+    ├── schema.prisma  # Models Task, User e enum Status
+    └── migrations/    # Histórico de migrações do banco
 ```
 
 **Fluxo de uma requisição:**
 ```
-Request → Route → Middleware (auth) → Controller (validação Zod) → Service (regra de negócio) → Repository (Prisma) → PostgreSQL
+Request → Route → Middleware (JWT) → Controller (Zod) → Service → Repository → PostgreSQL
 ```
 
-**Stack:**
+### Frontend
+
+```
+frontend/
+└── src/
+    ├── api/           # Instância Axios e funções de chamada à API
+    ├── components/    # Componentes reutilizáveis (TaskCard, Navbar, Button, Input...)
+    ├── contexts/      # AuthContext — armazena token e dados do usuário
+    ├── hooks/         # useAuth
+    ├── pages/         # Uma pasta por página
+    ├── routes/        # AppRouter e PrivateRoute
+    ├── types/         # Interfaces Task e User
+    └── validators/    # Schemas Zod dos formulários
+```
+
+---
+
+## Stack
+
+### Backend
+
 | Camada | Tecnologia |
 |---|---|
 | Runtime | Node.js + TypeScript |
-| Framework HTTP | Express 5 |
-| ORM | Prisma 7 (com adapter `@prisma/adapter-pg`) |
+| Framework | Express 5 |
+| ORM | Prisma 7 + `@prisma/adapter-pg` |
 | Banco de dados | PostgreSQL |
 | Autenticação | JWT (`jsonwebtoken`) |
 | Hash de senha | `bcryptjs` |
 | Validação | Zod |
 | Dev runner | `tsx watch` |
 
+### Frontend
+
+| Camada | Tecnologia |
+|---|---|
+| Framework | React 19 + TypeScript |
+| Estilização | Tailwind CSS 4 |
+| Roteamento | React Router DOM 7 |
+| Cliente HTTP | Axios |
+| Validação | Zod |
+| Build | Vite 8 |
+
 ---
 
 ## Modelo de dados
 
 ### User
+
 | Campo | Tipo | Descrição |
 |---|---|---|
 | `id` | Int (PK) | Identificador auto-incrementado |
@@ -67,6 +102,7 @@ Request → Route → Middleware (auth) → Controller (validação Zod) → Ser
 | `updatedAt` | DateTime | Data da última atualização |
 
 ### Task
+
 | Campo | Tipo | Descrição |
 |---|---|---|
 | `id` | Int (PK) | Identificador auto-incrementado |
@@ -81,23 +117,23 @@ Request → Route → Middleware (auth) → Controller (validação Zod) → Ser
 
 ## Documentação das rotas
 
+### Backend
+
 > Todas as rotas de tarefas exigem o header `Authorization: Bearer <token>`.
 
-### Autenticação — `/api/v1`
+#### Autenticação — `/api/v1`
 
-#### `POST /register` — Cadastrar usuário
+**`POST /register`** — Cadastrar usuário
 
-**Body:**
 ```json
+// Body
 {
   "email": "joao@email.com",
   "password": "minhasenha123",
   "name": "João Silva"
 }
-```
 
-**Resposta `201 Created`:**
-```json
+// Resposta 201
 {
   "id": 1,
   "email": "joao@email.com",
@@ -107,33 +143,36 @@ Request → Route → Middleware (auth) → Controller (validação Zod) → Ser
 }
 ```
 
----
+**`POST /login`** — Autenticar usuário
 
-#### `POST /login` — Autenticar usuário
-
-**Body:**
 ```json
+// Body
 {
   "email": "joao@email.com",
   "password": "minhasenha123"
 }
-```
 
-**Resposta `200 OK`:**
-```json
+// Resposta 200
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "email": "joao@email.com",
+    "name": "João Silva",
+    "createdAt": "2026-05-13T00:00:00.000Z",
+    "updatedAt": "2026-05-13T00:00:00.000Z"
+  }
 }
 ```
 
----
+#### Tarefas — `/api/v1/tasks`
 
-### Tarefas — `/api/v1/tasks` (requer autenticação)
+**`GET /tasks`** — Listar tarefas do usuário autenticado
 
-#### `GET /tasks` — Listar todas as tarefas do usuário autenticado
+Parâmetro opcional: `?status=PENDING` ou `?status=DONE`
 
-**Resposta `200 OK`:**
 ```json
+// Resposta 200
 [
   {
     "id": 1,
@@ -147,22 +186,18 @@ Request → Route → Middleware (auth) → Controller (validação Zod) → Ser
 ]
 ```
 
----
+**`POST /tasks`** — Criar tarefa
 
-#### `POST /tasks` — Criar uma tarefa
+> `description` é opcional. `status` é sempre `PENDING` na criação.
 
-**Body:**
 ```json
+// Body
 {
   "title": "Estudar TypeScript",
-  "description": "Revisar generics e utility types",
-  "status": "PENDING"
+  "description": "Revisar generics e utility types"
 }
-```
-> `description` e `status` são opcionais. `status` padrão é `PENDING`. Não é possível criar uma tarefa já com status `DONE`.
 
-**Resposta `201 Created`:**
-```json
+// Resposta 201
 {
   "id": 1,
   "title": "Estudar TypeScript",
@@ -174,12 +209,10 @@ Request → Route → Middleware (auth) → Controller (validação Zod) → Ser
 }
 ```
 
----
+**`GET /tasks/:id`** — Buscar tarefa por ID
 
-#### `GET /tasks/:id` — Buscar tarefa por ID
-
-**Resposta `200 OK`:**
 ```json
+// Resposta 200
 {
   "id": 1,
   "title": "Estudar TypeScript",
@@ -191,34 +224,26 @@ Request → Route → Middleware (auth) → Controller (validação Zod) → Ser
 }
 ```
 
-> Retorna `404` se a tarefa não existir ou não pertencer ao usuário autenticado.
+**`PUT /tasks/:id`** — Atualizar tarefa (todos os campos são opcionais)
 
----
-
-#### `PUT /tasks/:id` — Atualizar uma tarefa
-
-**Body (todos os campos são opcionais):**
 ```json
+// Body
 {
   "title": "Estudar TypeScript avançado",
   "description": "Focar em decorators",
   "status": "DONE"
 }
+
+// Resposta 200 — retorna a tarefa atualizada
 ```
 
-**Resposta `200 OK`:** retorna a tarefa atualizada.
+**`DELETE /tasks/:id`** — Remover tarefa
 
----
+```
+Resposta 204 No Content
+```
 
-#### `DELETE /tasks/:id` — Remover uma tarefa
-
-**Resposta `204 No Content`** — sem body.
-
-> Retorna `404` se a tarefa não existir ou não pertencer ao usuário autenticado.
-
----
-
-### Erros comuns
+#### Status de erro
 
 | Status | Situação |
 |---|---|
@@ -230,119 +255,9 @@ Request → Route → Middleware (auth) → Controller (validação Zod) → Ser
 
 ---
 
-## Como executar o projeto
+### Frontend
 
-### Pré-requisitos
-
-- [Node.js](https://nodejs.org/) v18+
-- [PostgreSQL](https://www.postgresql.org/) rodando localmente ou em um serviço (ex: Railway, Supabase, Render)
-
-### 1. Clone o repositório e acesse a pasta
-
-```bash
-git clone <url-do-repositorio>
-cd todo-api-develop/backend
-```
-
-### 2. Instale as dependências
-
-```bash
-npm install
-```
-
-### 3. Configure as variáveis de ambiente
-
-Copie o arquivo de exemplo e preencha com os seus dados:
-
-```bash
-cp .env.example .env
-```
-
-Edite o `.env` com as informações do seu banco e do JWT:
-
-```env
-# URL de conexão com o PostgreSQL
-DATABASE_URL="postgresql://usuario:senha@localhost:5432/nome_do_banco"
-
-# Chave secreta para assinar os tokens JWT (use uma string longa e aleatória)
-JWT_SECRET="sua_chave_secreta_aqui"
-
-# Tempo de expiração do token (opcional, padrão: 7d)
-JWT_EXPIRES_IN="7d"
-
-# Porta do servidor (opcional, padrão: 3000)
-PORT=3000
-```
-
-### 4. Gere o cliente Prisma
-
-```bash
-npx prisma generate
-```
-
-### 5. Execute as migrações no banco
-
-```bash
-npx prisma migrate deploy
-```
-
-> Durante o desenvolvimento, você pode usar `npx prisma migrate dev` para criar e aplicar migrações novas.
-
-### 6. Inicie o servidor
-
-**Modo desenvolvimento** (com hot reload):
-```bash
-npm run dev
-```
-
-**Modo produção:**
-```bash
-npm run build
-npm start
-```
-
-O servidor estará disponível em `http://localhost:3000` (ou na porta configurada no `.env`).
-
----
-
-## Frontend
-
-Interface web construída em React que consome a API REST do backend.
-
-| Camada | Tecnologia |
-|---|---|
-| Framework | React.js + TypeScript |
-| Estilização | Tailwind CSS |
-| Roteamento | React Router DOM |
-| Cliente HTTP | Axios |
-| Validação | Zod |
-
-### Instalação
-
-```bash
-cd todo-api-develop/frontend
-npm install
-```
-
-### Variáveis de ambiente
-
-Crie um `.env` na pasta `frontend/` baseado no `.env.example`:
-
-```env
-VITE_API_URL=http://localhost:3000/api/v1
-```
-
-### Scripts
-
-| Script | Descrição |
-|---|---|
-| `npm run dev` | Inicia em modo desenvolvimento em `http://localhost:5173` |
-| `npm run build` | Gera o build de produção na pasta `dist/` |
-| `npm run preview` | Visualiza o build de produção localmente |
-
-### Páginas
-
-| Rota | Descrição | Autenticação |
+| Rota | Página | Autenticação |
 |---|---|---|
 | `/login` | Tela de entrada com formulário de login | Pública |
 | `/register` | Cadastro de novo usuário | Pública |
@@ -350,3 +265,108 @@ VITE_API_URL=http://localhost:3000/api/v1
 | `/tasks/new` | Formulário de criação de tarefa | Protegida |
 | `/tasks/:id` | Detalhes de uma tarefa | Protegida |
 | `/tasks/:id/edit` | Edição de uma tarefa | Protegida |
+
+> Rotas protegidas redirecionam para `/login` se o token estiver ausente ou expirado.
+
+---
+
+## Como executar
+
+### Pré-requisitos
+
+- [Node.js](https://nodejs.org/) v18+
+- [PostgreSQL](https://www.postgresql.org/) rodando localmente
+
+### Backend
+
+**1. Acesse a pasta e instale as dependências**
+
+```bash
+cd backend
+npm install
+```
+
+**2. Configure as variáveis de ambiente**
+
+```bash
+cp .env.example .env
+```
+
+Edite o `.env`:
+
+```env
+DATABASE_URL="postgresql://usuario:senha@localhost:5432/todo_api"
+JWT_SECRET="sua_chave_secreta_longa_aqui"
+JWT_EXPIRES_IN="7d"
+PORT=3000
+CORS_ORIGIN=http://localhost:5173
+```
+
+**3. Gere o client Prisma e execute as migrações**
+
+```bash
+npx prisma generate
+npx prisma migrate deploy
+```
+
+**4. Inicie o servidor**
+
+```bash
+npm run dev       # desenvolvimento com hot reload
+npm run build     # compila para produção
+npm start         # inicia o build compilado
+```
+
+O servidor estará disponível em `http://localhost:3000`.
+
+---
+
+### Frontend
+
+**1. Acesse a pasta e instale as dependências**
+
+```bash
+cd frontend
+npm install
+```
+
+**2. Configure as variáveis de ambiente**
+
+```bash
+cp .env.example .env
+```
+
+Edite o `.env`:
+
+```env
+VITE_API_URL=http://localhost:3000/api/v1
+```
+
+**3. Inicie o servidor de desenvolvimento**
+
+```bash
+npm run dev       # desenvolvimento em http://localhost:5173
+npm run build     # build de produção na pasta dist/
+npm run preview   # visualiza o build localmente
+```
+
+---
+
+## Scripts
+
+### Backend
+
+| Script | Descrição |
+|---|---|
+| `npm run dev` | Inicia com hot reload via `tsx watch` |
+| `npm run build` | Compila TypeScript para `build/` |
+| `npm start` | Inicia o servidor a partir do build |
+
+### Frontend
+
+| Script | Descrição |
+|---|---|
+| `npm run dev` | Inicia em modo desenvolvimento |
+| `npm run build` | Gera o build de produção em `dist/` |
+| `npm run preview` | Visualiza o build localmente |
+| `npm run lint` | Executa o ESLint |
